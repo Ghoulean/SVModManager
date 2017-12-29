@@ -1,0 +1,30 @@
+{
+  "name": "mod name",
+  "version": "1.0.0",
+  "authors": [
+    "author 1",
+    "author 2"
+  ],
+  "description": "description",
+  "copy_files": {
+    "a": [
+      "file1.unity3d",
+      "file2.unity3d",
+      "file3.unity3d"
+    ],
+    "v": [
+      "file5.acb",
+      "file6.acb"
+    ]
+  },
+  "preview": {
+    "a": [
+      "file1.png",
+      "file3.jpg"
+    ],
+    "v": [
+      "file5.mp3",
+      "file6.wav"
+    ]
+  }
+}   
