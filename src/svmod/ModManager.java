@@ -57,9 +57,7 @@ public class ModManager {
         }
         for (Path nextMod : modFolders) {
             Mod m = new Mod(nextMod);
-            if (m.isValid()) {
-                modsList.add(m);
-            }
+            modsList.add(m);
         }
         return "";
     }
