@@ -20,7 +20,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -44,7 +43,7 @@ public class SVModView {
     private static SVModView instance = null;
 
     private final int PADDING = 10;
-    private final int BUTTON_WIDTH = 140;
+    private final int BUTTON_WIDTH = 150;
 
     private final ModManager modManager;
     private final FileIdentifier fileIdentifier;
@@ -74,7 +73,7 @@ public class SVModView {
     public void showMainMenu() {
         view.getChildren().clear();
         view.getChildren().add(mainMenu);
-        ((ListView) mainMenu.getChildren().get(3)).refresh();
+        ((ListView) mainMenu.getChildren().get(2)).refresh();
     }
 
     public void showModPanel(Mod item) {
@@ -88,16 +87,8 @@ public class SVModView {
         // GUI
         mainMenu = new VBox(PADDING);
         mainMenu.setPadding(new Insets(PADDING, PADDING, PADDING, PADDING));
-        HBox filesFolderGUI = new HBox(PADDING);
         HBox modFolderGUI = new HBox(PADDING);
         HBox backupFolderGUI = new HBox(PADDING);
-
-        TextField gameFilesLocation = new TextField(SVGameFiles.getInstance().getGameFileLocation().toString());
-        gameFilesLocation.setDisable(true);
-        HBox.setHgrow(gameFilesLocation, Priority.ALWAYS);
-        Button changeGameFilesLocationBtn = new Button("Change SV Folder...");
-        changeGameFilesLocationBtn.setMinWidth(BUTTON_WIDTH);
-        filesFolderGUI.getChildren().addAll(gameFilesLocation, changeGameFilesLocationBtn);
 
         TextField modFolderText = new TextField(modManager.getModDirectory().toString());
         modFolderText.setDisable(true);
@@ -122,28 +113,18 @@ public class SVModView {
         HBox.setHgrow(logger, Priority.ALWAYS);
 
         HBox installOptions = new HBox(PADDING);
-        Button formatModBtn = new Button("Format...");
         Button installBtn = new Button("Install");
         Button uninstallBtn = new Button("Uninstall");
         Button partialBtn = new Button("Partial...");
-        formatModBtn.setMinWidth(BUTTON_WIDTH);
         installBtn.setMinWidth(BUTTON_WIDTH);
         uninstallBtn.setMinWidth(BUTTON_WIDTH);
         partialBtn.setMinWidth(BUTTON_WIDTH);
-        formatModBtn.setDisable(true);
-        installBtn.setDisable(true);
-        uninstallBtn.setDisable(true);
-        partialBtn.setDisable(true);
         installOptions.setAlignment(Pos.BOTTOM_RIGHT);
-        installOptions.getChildren().addAll(formatModBtn, installBtn, uninstallBtn, partialBtn);
+        installOptions.getChildren().addAll(installBtn, uninstallBtn, partialBtn);
 
-        mainMenu.getChildren().addAll(filesFolderGUI, modFolderGUI, backupFolderGUI, modList, logger, installOptions);
+        mainMenu.getChildren().addAll(modFolderGUI, backupFolderGUI, modList, logger, installOptions);
 
         // Functionality
-        changeGameFilesLocationBtn.setOnAction((ActionEvent event) -> {
-            SVGameFiles svgf = SVGameFiles.getInstance();
-            selectDirectory(modFolderText, "Change ShadowverseFolder Folder", svgf.getGameFileLocation(), svgf::setGameFileLocation);
-        });
         changeModFolderBtn.setOnAction((ActionEvent event) -> {
             selectDirectory(modFolderText, "Change Mod Folder", modManager.getModDirectory(), modManager::setModDirectory);
             addToLogger(modManager.loadMods());
@@ -175,34 +156,6 @@ public class SVModView {
                 setText(item.toString());
                 setTextFill(Color.BLACK);
             }
-        });
-        modList.setOnMouseClicked((MouseEvent event) -> {
-            Mod selected = modList.getSelectionModel().getSelectedItem();
-            if (selected == null) {
-                formatModBtn.setDisable(true);
-                installBtn.setDisable(true);
-                uninstallBtn.setDisable(true);
-                partialBtn.setDisable(true);
-            } else if (!selected.isValid()) {
-                formatModBtn.setDisable(false);
-                installBtn.setDisable(true);
-                uninstallBtn.setDisable(true);
-                partialBtn.setDisable(true);
-            } else {
-                formatModBtn.setDisable(true);
-                installBtn.setDisable(false);
-                uninstallBtn.setDisable(false);
-                partialBtn.setDisable(false);
-            }
-        });
-        formatModBtn.setOnAction((ActionEvent event) -> {
-            Mod item = modList.getSelectionModel().getSelectedItem();
-            if (item == null) {
-                return;
-            }
-            Mod.processMalformedMod(item.getFolderPath());
-            modManager.loadMods();
-            modList.refresh();
         });
         installBtn.setOnAction((ActionEvent event) -> {
             Mod item = modList.getSelectionModel().getSelectedItem();
@@ -243,7 +196,6 @@ public class SVModView {
         Label name = new Label(mod.getName());
         Label version = new Label("v" + mod.getVersion());
         Label authors = new Label(mod.getAuthors().toString());
-        authors.setTooltip(new Tooltip(mod.getAuthors().toString()));
 
         ObservableList<Path> oListModFiles = FXCollections.observableArrayList(mod.getModFiles());
         ListView<Path> filesList = new ListView<>(oListModFiles);
@@ -383,11 +335,11 @@ public class SVModView {
             Image i = null;
             try {
                 m = previewMediaPane.getMediaPlayer().getMedia();
-            } catch (Exception e) {
+            } catch (Exception e) {      
             }
             try {
                 i = previewImagePane.getImage();
-            } catch (Exception e) {
+            } catch (Exception e) {      
             }
             if (m == null && i == null) {
                 return;

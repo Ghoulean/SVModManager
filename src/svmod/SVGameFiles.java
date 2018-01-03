@@ -12,8 +12,7 @@ public class SVGameFiles {
     private static SVGameFiles instance = null;
 
     private static final Path HOME_PATH = Paths.get(System.getProperty("user.home"));
-    private static Path SV_PATH = Paths.get(HOME_PATH.toString(), "AppData", "LocalLow", "Cygames", "Shadowverse");
-    private static final String[] GAME_FOLDERS = {"a", "b", "m", "s", "v"};
+    private static final Path SV_PATH = Paths.get(HOME_PATH.toString(), "AppData", "LocalLow", "Cygames", "Shadowverse");
 
     protected SVGameFiles() {
     }
@@ -52,7 +51,7 @@ public class SVGameFiles {
         }
         return "Installed " + targetFile.toString();
     }
-
+    
     public String deleteFile(Path targetFile) {
         Path destinationFolder = targetFile.getParent();
         Path destination = Paths.get(SV_PATH.toString(), destinationFolder.getFileName().toString());
@@ -94,27 +93,9 @@ public class SVGameFiles {
         }
         return "Created backup of " + targetFile.toString();
     }
-
+    
     public Path getGameFileLocation() {
         return SV_PATH;
-    }
-
-    public void setGameFileLocation(Path s) {
-        SV_PATH = s;
-    }
-
-    public void setGameFileLocation(String s) {
-        SV_PATH = Paths.get(s).normalize();
-    }
-
-    public String findGameFile(Path p) {
-        for (String GAME_FOLDERS1 : GAME_FOLDERS) {
-            Path test = Paths.get(SV_PATH.toString(), GAME_FOLDERS1, p.getFileName().toString());
-            if (Files.exists(test)) {
-                return GAME_FOLDERS1;
-            }
-        }
-        return null;
     }
     
 }
