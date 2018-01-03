@@ -2,12 +2,16 @@ package svmod;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -78,7 +82,7 @@ public class Mod {
     @Override
     public String toString() {
         if (!this.isValid()) {
-            return "BAD MOD";
+            return this.name + " (NEEDS FORMATTING)";
         }
         if (this.description.equals("")) {
             return this.name;
@@ -89,6 +93,7 @@ public class Mod {
     private void load() {
         Path modjsonFile = Paths.get(folderPath.toString(), MODJSON);
         if (Files.notExists(modjsonFile)) {
+            name = folderPath.getFileName().toString();
             System.out.println("Cannot find " + MODJSON + " metadata file: Does not exist " + folderPath.toString());
             return;
         }
@@ -216,6 +221,58 @@ public class Mod {
 
     private String removeExtension(String file) {
         return file.replaceAll("\\.[^.]*$", "");
+    }
+    
+    public static String processMalformedMod(Path p) {
+        p = p.toAbsolutePath();
+        JsonObject modJsonFile = new JsonObject();
+        
+        modJsonFile.addProperty("name", p.getFileName().toString());
+        modJsonFile.addProperty("version", "1.0.0");
+        modJsonFile.addProperty("description", "");
+        JsonArray authors = new JsonArray();
+        authors.add("Ghoulean's SVModManager");
+        modJsonFile.add("authors", authors);
+        
+        JsonObject copyFiles = new JsonObject();
+        
+        boolean bad = true;
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(p)) {
+            for (Path path : directoryStream) {
+                path = path.getFileName();
+                String destinedFolder = SVGameFiles.getInstance().findGameFile(path);
+                if (destinedFolder != null) {
+                    bad = false;
+                    Path original = Paths.get(p.toString(), path.toString());
+                    Path moveLoc = Paths.get(p.toString(), destinedFolder, path.toString());
+                    Files.createDirectories(Paths.get(p.toString(), destinedFolder));
+                    Files.copy(original, moveLoc);
+                    Files.deleteIfExists(original);
+                    if (!copyFiles.has(destinedFolder)) {
+                        copyFiles.add(destinedFolder, new JsonArray());
+                    }
+                    copyFiles.getAsJsonArray(destinedFolder).add(path.toString());
+                }
+            }
+        } catch (IOException ex) {
+            return null;
+        }
+        if (bad) {
+            return null;
+        }
+        modJsonFile.add("copy_files", copyFiles);
+        try {
+            Files.write(Paths.get(p.toString(), "mod.json"), 
+                    new Gson().toJson(modJsonFile).getBytes("utf-8"), 
+                    StandardOpenOption.CREATE, 
+                    StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(Mod.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Mod.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return "yes";
     }
 
 }
