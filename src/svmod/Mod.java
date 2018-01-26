@@ -222,20 +222,28 @@ public class Mod {
     private String removeExtension(String file) {
         return file.replaceAll("\\.[^.]*$", "");
     }
-    
-    public static String processMalformedMod(Path p) {
+
+    public static String processMalformedMod(Path p, String modName, String modAuthors) {
         p = p.toAbsolutePath();
         JsonObject modJsonFile = new JsonObject();
-        
-        modJsonFile.addProperty("name", p.getFileName().toString());
+
+        String name = (modName.length() > 0) ? modName : p.getFileName().toString();
+        modJsonFile.addProperty("name", name);
         modJsonFile.addProperty("version", "1.0.0");
-        modJsonFile.addProperty("description", "");
+        modJsonFile.addProperty("description", "Formatted by Ghoulean's SVModManager");
         JsonArray authors = new JsonArray();
-        authors.add("Ghoulean's SVModManager");
+        String[] allModAuthors = modAuthors.split(",");
+        if (allModAuthors.length == 0) {
+            authors.add("Anonymous");
+        } else {
+            for (String s : allModAuthors) {
+                authors.add(s);
+            }
+        }
         modJsonFile.add("authors", authors);
-        
+
         JsonObject copyFiles = new JsonObject();
-        
+
         boolean bad = true;
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(p)) {
             for (Path path : directoryStream) {
@@ -262,16 +270,16 @@ public class Mod {
         }
         modJsonFile.add("copy_files", copyFiles);
         try {
-            Files.write(Paths.get(p.toString(), "mod.json"), 
-                    new Gson().toJson(modJsonFile).getBytes("utf-8"), 
-                    StandardOpenOption.CREATE, 
+            Files.write(Paths.get(p.toString(), "mod.json"),
+                    new Gson().toJson(modJsonFile).getBytes("utf-8"),
+                    StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING);
         } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(Mod.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(Mod.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         return "yes";
     }
 

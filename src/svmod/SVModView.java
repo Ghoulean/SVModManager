@@ -3,6 +3,7 @@ package svmod;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.function.Consumer;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -20,6 +21,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -200,7 +202,24 @@ public class SVModView {
             if (item == null) {
                 return;
             }
-            Mod.processMalformedMod(item.getFolderPath());
+            String formatModName = "";
+            String formatModAuthors = "";
+            TextInputDialog dialog = new TextInputDialog("Mod Name");
+            dialog.setTitle("Mod Name");
+            dialog.setHeaderText("Enter Mod Name");
+            Optional<String> result = dialog.showAndWait();
+            if (result.isPresent()){
+                formatModName = result.get();
+            }
+            dialog = new TextInputDialog("Mod Authors");
+            dialog.setTitle("Mod Authors");
+            dialog.setHeaderText("Enter Mod Authors");
+            dialog.setContentText("Seperate multiply authors with comma (,)");
+            result = dialog.showAndWait();
+            if (result.isPresent()){
+                formatModAuthors = result.get();
+            }
+            Mod.processMalformedMod(item.getFolderPath(), formatModName, formatModAuthors);
             modManager.loadMods();
             modList.refresh();
         });
