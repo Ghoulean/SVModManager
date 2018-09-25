@@ -1,3 +1,5 @@
+This repository is no longer being maintained. Please find an alternative service instead.
+
 # Ghoulean's SVModManager
 
 Mod Manager for Shadowverse
